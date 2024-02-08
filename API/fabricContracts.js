@@ -84,24 +84,109 @@ console.log(`Failed to register user \"`, username, `\": ${error}`);
  }
 
 
- async registerSensor(){
+ async registerSensor(username, channel, smartcontract, iot){
+try{
+     // Create a new file system based wallet for managing identities.
+     const walletPath = path.join(process.cwd(), 'wallet');
+     const wallet = new FileSystemWallet(walletPath);
+     console.log(`Wallet path: ${walletPath}`);
 
- }
+     const userExists=await wallet.exists(username);
+     if (!userExists) {
+        console.log('Invalid user \"', username, '\" ');
+        console.log('Run the registerUser.js application before retrying');
+        return;
+    }
+    //creating a new gateway to connect to peer node
+    //gateway class is provided by HLF to connect to the network
+    const gateway=new gateway();
+    await gateway.connect(ccp,{wallet,identity:username,discovery:{enabled:false}});
+    const network=gateway.getNetwork(channel);
+    const contract=network.getContract(smartcontract);
+    await contract.submitTransaction('registerSensor', iot.sensorID);
+    //disconnect from the gateway
+    await gateway.disconnect();
+    return 'Sensor registered'
+} catch(error){
 
-
-
- async addTemptoContract(){
-
- }
-
-
- async getData(){
-
- }
-
-
-
-
+    console.error(`Failed to submit transaction: ${error}`);
+    
 }
+ }
+
+
+
+ async addTemptoContract(username, channel, smartcontract, iot){
+try{//file system based wallet to manage identitites
+    const walletPath = path.join(process.cwd(), 'wallet');
+    const wallet = new FileSystemWallet(walletPath);
+    console.log(`Wallet path: ${walletPath}`);
+//checking if user exists
+    const userExists=await wallet.exists(username);
+    if (!userExists) {
+       console.log('Invalid user \"', username, '\" ');
+       console.log('Run the registerUser.js application before retrying');
+       return;
+   }   
+    // Create a new gateway for connecting to our peer node.
+    const gateway = new Gateway();
+    await gateway.connect(ccp, { wallet, identity: username, discovery: { enabled: false } });
+    const network=gateway.getNetwork(channel);
+    const contract=network.getContract(smartcontract);
+    await contract.submitTransaction('Temperature',{"sensor ID":iot.sensorID,
+"temperature":iot.temp, "Time":iot.time });
+
+await gateway.disconnect();
+console.log("Temperature data has been added to network");
+process.exit(1);
+} catch(error){
+console.log(`failed to add temperature data ${error}`);
+}
+ }
+
+
+ async getData(username, channel, smartcontract, iot){
+    try {
+    
+        // Create a new file system based wallet for managing identities.
+        const walletPath = path.join(process.cwd(), 'wallet');
+        const wallet = new FileSystemWallet(walletPath);
+        console.log(`Wallet path: ${walletPath}`);
+
+        // Check to see if we've already enrolled the user.
+        const userExists = await wallet.exists(username);
+        if (!userExists) {
+            console.log('An identity for the user \"', username, '\" does not exist in the wallet');
+            console.log('Run the registerUser.js application before retrying');
+            return;
+        }
+
+        // Create a new gateway for connecting to our peer node.
+        const gateway = new Gateway();
+        await gateway.connect(ccp, { wallet, identity: username, discovery: { enabled: false } });
+
+        // Get the network (channel) our contract is deployed to.
+        const network = await gateway.getNetwork(channel);
+
+        // Get the contract from the network.
+        const contract = network.getContract(smartcontract);
+
+        const result = await contract.evaluateTransaction('getHistory', iot.sensorID);
+        console.log(`Temperature recorded by sensor ${iot.sensorID}: ${result.toString()}`);
+        return result.toString();
+        //time based search function
+
+        //graph of temperature variation
+    } catch (error) {
+        console.error(`Failed to evaluate transaction: ${error}`);
+        process.exit(1);
+    }
+}
+ }
+
+
+
+
+
 
 module.exports=fabricContracts;

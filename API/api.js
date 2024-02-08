@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const FabricService = require('./fabricService')
+const fabricContracts = require('./fabricContracts')
 
-const fabricService = new FabricService();
+const fabricContracts = new fabricContracts();
 
 
 router.post("/enrollAdmin", (req,res) => {
-    fabricService.enrollAdmin(req.body.adminName, req.body.password).then((results) => {
+    fabricContracts.enrollAdmin(req.body.adminName, req.body.password).then((results) => {
         res.send(results);
         return results;
     });
 });
 
-router.post("/registerUser", (req,res) => {
-    fabricService.registerUser(req.body.adminName, req.body.username).then((results) => {
+router.post("/RegisterUser", (req,res) => {
+    fabricContracts.RegisterUser(req.body.adminName, req.body.username).then((results) => {
         res.send(results);
         return results;
     });
@@ -21,21 +21,21 @@ router.post("/registerUser", (req,res) => {
 
 router.post("/registerSensor", (req,res) => {
     console.log(req.body.args)
-    fabricService.registerSensor(req.body.username, req.body.channel, req.body.smartcontract, req.body.args).then((results) => {
+    fabricContracts.registerSensor(req.body.username, req.body.channel, req.body.smartcontract, req.body.iot).then((results) => {
         res.send(results);
         return results;
     });
 });
 
-router.post("/addTemp", (req,res) => {
-    fabricService.addTemp(req.body.username, req.body.channel, req.body.smartcontract, req.body.args).then((results) => {
+router.post("/IOTdataaddition", (req,res) => {
+    fabricContracts.addTemptoContract(req.body.username, req.body.channel, req.body.smartcontract, req.body.iot).then((results) => {
         res.send(results);
         return results;
     });
 });
 
-router.post("/getHistory", (req,res) => {
-    fabricService.getHistory(req.body.username, req.body.channel, req.body.smartcontract, req.body.args).then((results) => {
+router.post("/getData", (req,res) => {
+    fabricContracts.getData(req.body.username, req.body.channel, req.body.smartcontract, req.body.iot).then((results) => {
         res.send(results);
         return results;
     });

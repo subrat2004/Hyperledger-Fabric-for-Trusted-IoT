@@ -17,16 +17,16 @@ class fabricService{
 
    async enrollAdmin(adminName, password) {
         try {
-            // Create a new CA client for interacting with the CA.
+            // Creating  a new CA client for interacting with the CA.
             const caURL = ccp.certificateAuthorities['caorg1'].url;
             const ca = new FabricCAServices(caURL);
     
-            // Create a new file system based wallet for managing identities.
+            // Creating  a new file system based wallet for managing identities.
             const walletPath = path.join(process.cwd(), 'wallet');
             const wallet = new FileSystemWallet(walletPath);
             console.log(`Wallet path: ${walletPath}`);
     
-            // Check to see if we've already enrolled the admin user.
+            // Checking  if admin is already a user
             const adminExists = await wallet.exists(adminName);
             if (adminExists) {
                 console.log('An identity for the admin user \"', adminName, '\" already exists in the wallet');
